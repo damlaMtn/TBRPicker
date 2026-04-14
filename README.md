@@ -8,7 +8,7 @@ A random book picker that reads your Goodreads TBR (To Be Read) list and suggest
 
 ## What it does
 
-If you're anything like me, your TBR list is out of control and choosing the next book is somehow harder than reading it. TBRPicker solves that by picking one for you — randomly, or filtered by page count, mood, or genre.
+If you're anything like me, your TBR list is out of control, and choosing the next book is somehow harder than reading it. TBRPicker solves that by picking one for you. Randomly, or filtered by page count, mood, or genre.
 
 ---
 
@@ -18,7 +18,7 @@ If you're anything like me, your TBR list is out of control and choosing the nex
 - ✅ Filters for your TBR shelf automatically
 - ✅ Returns a random book from your list
 - 🔜 Filter by page count
-- 🔜 Filter by mood / genre
+- 🔜 Filter by mood/genre
 - 🔜 Simple web frontend
 
 ---
@@ -42,7 +42,7 @@ If you're anything like me, your TBR list is out of control and choosing the nex
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/TBRPicker.git
+   git clone https://github.com/damlaMtn/TBRPicker.git
    cd TBRPicker
    ```
 
