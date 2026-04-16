@@ -9,12 +9,9 @@ namespace TBRPicker.Models
         public string Author { get; set; }
 
         [Name("Bookshelves")]
-        public string Bookshelf { get; set; }
+        public string ExclusiveShelf { get; set; }
 
         [Name("Number of Pages")]
         public int? NumberOfPages { get; set; }
-
-        [Name("My Rating")]
-        public double? MyRating { get; set; }
     }
 }
