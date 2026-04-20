@@ -1,8 +1,9 @@
 ﻿using CsvHelper;
-using System.Globalization;
-using TBRPicker.Models;
 using CsvHelper.Configuration;
+using System.Globalization;
 using System.IO;
+using TBRPicker.Models;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace TBRPicker.Services
 {
@@ -10,7 +11,7 @@ namespace TBRPicker.Services
     {
         private readonly string _csvPath = @"C:\Users\damla\Desktop\Projects\_TBRPicker\goodreads_library_export.csv";
 
-        public List<GoodreadsBook> GetTBRBooks()
+        public List<GoodreadsBook> GetTBRBooks(int? maxPages = null)
         {
             if (!File.Exists(_csvPath))
             {
@@ -25,6 +26,9 @@ namespace TBRPicker.Services
                 var records = csv.GetRecords<GoodreadsBook>()
                                  .Where(b => b?.ExclusiveShelf?.Contains("to-read") == true)
                                  .ToList();
+
+                if (maxPages.HasValue)
+                    records = records.Where(b => b.NumberOfPages <= maxPages.Value).ToList();
 
                 return records;
             }

@@ -72,11 +72,11 @@ namespace TBRPicker.Controllers
         }
 
         [HttpGet("random")]
-        public IActionResult GetRandomBook()
+        public IActionResult GetRandomBook([FromQuery] int? maxPages = null)
         {
             try
             {
-                var books = _bookService.GetTBRBooks();
+                var books = _bookService.GetTBRBooks(maxPages);
 
                 if (!books.Any())
                 {
