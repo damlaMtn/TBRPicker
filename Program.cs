@@ -1,9 +1,12 @@
 using CsvHelper;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using TBRPicker.Models;
 using System.IO;
+using TBRPicker.Data;
+using TBRPicker.Models;
+using TBRPicker.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +18,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<TBRPicker.Services.BookService>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=tbr.db"));
+builder.Services.AddScoped<BookService>();
+
 
 var app = builder.Build();
 

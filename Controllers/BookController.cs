@@ -17,6 +17,7 @@ namespace TBRPicker.Controllers
             _logger = logger;
         }
 
+
         [HttpGet("tbr")]
         public IActionResult GetTBRBooks()
         {
@@ -98,6 +99,13 @@ namespace TBRPicker.Controllers
                 _logger.LogError(ex, "Unexpected error while selecting random book.");
                 return Problem(title: "Unexpected error", detail: "An error occurred while processing the request.");
             }
+        }
+
+        [HttpPost("import")]
+        public IActionResult ImportBooks()
+        {
+            _bookService.ImportBooks();
+            return Ok("Books imported successfully!");
         }
     }
 }

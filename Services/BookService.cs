@@ -2,6 +2,7 @@
 using CsvHelper.Configuration;
 using System.Globalization;
 using System.IO;
+using TBRPicker.Data;
 using TBRPicker.Models;
 using static System.Reflection.Metadata.BlobBuilder;
 
@@ -11,7 +12,15 @@ namespace TBRPicker.Services
     {
         private readonly string _csvPath = @"C:\Users\damla\Desktop\Projects\_TBRPicker\goodreads_library_export.csv";
 
-        public List<GoodreadsBook> GetTBRBooks(int? maxPages = null)
+        private readonly AppDbContext _context;
+
+        public BookService(AppDbContext context)
+        {
+            _context = context;
+        }
+
+
+        public List<Book> GetTBRBooks(int? maxPages = null)
         {
             if (!File.Exists(_csvPath))
             {
@@ -20,17 +29,12 @@ namespace TBRPicker.Services
 
             try
             {
-                using var reader = new StreamReader(_csvPath);
-                using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-
-                var records = csv.GetRecords<GoodreadsBook>()
-                                 .Where(b => b?.ExclusiveShelf?.Contains("to-read") == true)
-                                 .ToList();
+                var books = _context.Books.AsQueryable();
 
                 if (maxPages.HasValue)
-                    records = records.Where(b => b.NumberOfPages <= maxPages.Value).ToList();
+                    books = books.Where(b => b.PageCount <= maxPages.Value);
 
-                return records;
+                return books.ToList();
             }
             catch (FileNotFoundException)
             {
@@ -55,6 +59,26 @@ namespace TBRPicker.Services
                 // Fallback for any other unexpected error.
                 throw new Exception($"Unexpected error while reading CSV file at '{_csvPath}': {ex.Message}", ex);
             }
+        }
+
+        public void ImportBooks()
+        {
+            var tbrBooks = GetTBRBooks();
+
+            foreach (var b in tbrBooks)
+            {
+                var book = new Book
+                {
+                    Title = b.Title,
+                    Author = b.Author,
+                    Shelf = b.Shelf,
+                    PageCount = b.PageCount
+                };
+
+                _context.Books.Add(book);
+            }
+
+            _context.SaveChanges();
         }
     }
 }
