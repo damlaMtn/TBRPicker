@@ -7,5 +7,6 @@
         public string Author { get; set; }
         public int? PageCount { get; set; }
         public string Shelf { get; set; }
+        public string? Genre { get; set; }
     }
 }

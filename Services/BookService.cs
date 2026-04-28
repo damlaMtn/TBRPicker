@@ -20,7 +20,7 @@ namespace TBRPicker.Services
         }
 
 
-        public List<Book> GetTBRBooks(int? maxPages = null)
+        public List<Book> GetTBRBooks(int? maxPages = null, string? genre = null)
         {
             if (!File.Exists(_csvPath))
             {
@@ -33,6 +33,10 @@ namespace TBRPicker.Services
 
                 if (maxPages.HasValue)
                     books = books.Where(b => b.PageCount <= maxPages.Value);
+
+                if (!string.IsNullOrEmpty(genre))
+                    books = books.Where(b => b.Genre != null &&
+                            b.Genre.ToLower().Contains(genre.ToLower()));
 
                 return books.ToList();
             }
