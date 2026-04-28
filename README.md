@@ -8,7 +8,7 @@ A random book picker that reads your Goodreads TBR (To Be Read) list and suggest
 
 ## What it does
 
-If you're anything like me, your TBR list is out of control, and choosing the next book is somehow harder than reading it. TBRPicker solves that by picking one for you. Randomly, or filtered by page count, mood, or genre.
+If you're anything like me, your TBR list is out of control and choosing the next book is somehow harder than reading it. TBRPicker solves that by picking one for you. Randomly, or filtered by page count or genre.
 
 ---
 
@@ -16,9 +16,10 @@ If you're anything like me, your TBR list is out of control, and choosing the ne
 
 - ✅ Imports your Goodreads library export (CSV)
 - ✅ Filters for your TBR shelf automatically
+- ✅ Stores your books in a local SQLite database
 - ✅ Returns a random book from your list
-- 🔜 Filter by page count
-- 🔜 Filter by mood/genre
+- ✅ Filter by maximum page count
+- ✅ Filter by genre
 - 🔜 Simple web frontend
 
 ---
@@ -27,7 +28,7 @@ If you're anything like me, your TBR list is out of control, and choosing the ne
 
 - [ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/) — backend API
 - [CsvHelper](https://joshclose.github.io/CsvHelper/) — Goodreads CSV parsing
-- Entity Framework Core + SQLite — data persistence *(coming soon)*
+- [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/) + SQLite — data persistence
 
 ---
 
@@ -50,9 +51,9 @@ If you're anything like me, your TBR list is out of control, and choosing the ne
    - Go to Goodreads → Account → Settings → scroll down to **Export Library**
    - Download the CSV file
 
-3. Update the CSV path in `Program.cs`
+3. Update the CSV path in `BookService.cs`
    ```csharp
-   var csvPath = @"C:\your\path\to\goodreads_library_export.csv";
+   private readonly string _csvPath = @"C:\your\path\to\goodreads_library_export.csv";
    ```
 
 4. Run the project
@@ -62,16 +63,20 @@ If you're anything like me, your TBR list is out of control, and choosing the ne
 
 5. Open Swagger UI at `https://localhost:{port}/swagger`
 
+6. Call `POST /api/book/import` once to import your books into the database
+
 ---
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/books/tbr` | Returns your full TBR list |
-| GET | `/api/books/random` | Returns a random book from your TBR |
-
-*More endpoints coming as the project develops.*
+| GET | `/api/book/tbr` | Returns your full TBR list |
+| GET | `/api/book/random` | Returns a random book from your TBR |
+| GET | `/api/book/random?maxPages=300` | Random book under 300 pages |
+| GET | `/api/book/random?genre=fantasy` | Random book by genre |
+| GET | `/api/book/random?maxPages=300&genre=fantasy` | Combine filters |
+| POST | `/api/book/import` | Imports your Goodreads CSV into the database |
 
 ---
 
