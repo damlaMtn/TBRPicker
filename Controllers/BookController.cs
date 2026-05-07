@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.IO;
 using TBRPicker.Services;
 
@@ -15,6 +16,17 @@ namespace TBRPicker.Controllers
         {
             _bookService = bookService;
             _logger = logger;
+        }
+
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadCSV(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Please upload a valid CSV file.");
+
+            using var stream = file.OpenReadStream();
+            var result = _bookService.ImportBooksFromStream(stream);
+            return Ok(result);
         }
 
 
@@ -73,11 +85,11 @@ namespace TBRPicker.Controllers
         }
 
         [HttpGet("random")]
-        public IActionResult GetRandomBook([FromQuery] int? maxPages = null, [FromQuery] string? genre = null)
+        public IActionResult GetRandomBook([FromQuery] int? maxPages = null, [FromQuery] string? genre = null, [FromQuery] string? shelf = null)
         {
             try
             {
-                var books = _bookService.GetTBRBooks(maxPages, genre);
+                var books = _bookService.GetTBRBooks(maxPages, genre, shelf);
 
                 if (!books.Any())
                 {
@@ -99,6 +111,13 @@ namespace TBRPicker.Controllers
                 _logger.LogError(ex, "Unexpected error while selecting random book.");
                 return Problem(title: "Unexpected error", detail: "An error occurred while processing the request.");
             }
+        }
+
+        [HttpGet("shelves")]
+        public IActionResult GetShelves()
+        {
+            var shelves = _bookService.GetShelves();
+            return Ok(shelves);
         }
 
         [HttpPost("import")]
