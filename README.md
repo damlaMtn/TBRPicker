@@ -20,7 +20,7 @@ If you're anything like me, your TBR list is out of control and choosing the nex
 - ✅ Returns a random book from your list
 - ✅ Filter by maximum page count
 - ✅ Filter by genre
-- 🔜 Simple web frontend
+- ✅ Simple web frontend
 
 ---
 
