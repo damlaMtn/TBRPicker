@@ -69,7 +69,10 @@
             <div class="mb-3">
                 <input type="file" id="csvFile" class="form-control" accept=".csv" />
             </div>
-            <button class="btn btn-pick w-100" onclick="uploadCSV()">Import</button>
+            <div class="d-flex gap-2">
+                <button class="btn btn-pick flex-fill" onclick="uploadCSV()">Import (replaces all)</button>
+                <button class="btn btn-outline-primary flex-fill" onclick="syncCSV()">Sync (adds new only)</button>
+            </div>
             <div id="importMessage" class="mt-2 text-center" style="display:none;"></div>
         </div>
 
@@ -211,6 +214,42 @@
             });
 
             document.getElementById('shelfSection').style.display = 'block';
+        }
+
+        async function syncCSV() {
+            const fileInput = document.getElementById('csvFile');
+            const message = document.getElementById('importMessage');
+
+            if (!fileInput.files[0]) {
+                message.style.display = 'block';
+                message.style.color = '#888';
+                message.textContent = 'Please select a CSV file first.';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                message.style.display = 'block';
+                message.style.color = '#888';
+                message.textContent = 'Syncing...';
+
+                const response = await fetch('/api/book/sync', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const text = await response.text();
+                message.style.color = response.ok ? '#2E75B6' : '#dc3545';
+                message.textContent = text;
+
+                if (response.ok) await loadShelves();
+
+            } catch (error) {
+                message.style.color = '#dc3545';
+                message.textContent = 'Something went wrong. Please try again.';
+            }
         }
     </script>
 </body>

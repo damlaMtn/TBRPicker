@@ -21,6 +21,7 @@ If you're anything like me, your TBR list is out of control and choosing the nex
 - ✅ Filter by maximum page count
 - ✅ Filter by genre
 - ✅ Filter by one or multiple shelves
+- ✅ Sync new books without replacing existing data
 - 🔜 Edit book genres from the frontend
 - 🔜 Show full book list on the page
 - 🔜 AI-powered mood-based picking
@@ -80,6 +81,7 @@ If you're anything like me, your TBR list is out of control and choosing the nex
 | GET | `/api/book/random?shelf=to-read,books-i-own` | Random book from multiple shelves |
 | GET | `/api/book/shelves` | Returns all available shelves |
 | POST | `/api/book/upload` | Uploads and imports a Goodreads CSV file |
+| POST | `/api/book/sync` | Syncs CSV adds new books, skips existing |
 
 ---
 

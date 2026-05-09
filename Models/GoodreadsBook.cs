@@ -5,6 +5,8 @@ namespace TBRPicker.Models
 {
     public class GoodreadsBook
     {
+        [Name("Book Id")]
+        public string BookId { get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
 
@@ -12,6 +14,9 @@ namespace TBRPicker.Models
         public string ExclusiveShelf { get; set; }
 
         [Name("Number of Pages")]
-        public int? NumberOfPages { get; set; }
+        public double? NumberOfPages { get; set; }
+
+        [Name("Genres")]
+        public string? Genres { get; set; }
     }
 }

@@ -120,11 +120,15 @@ namespace TBRPicker.Controllers
             return Ok(shelves);
         }
 
-        [HttpPost("import")]
-        public IActionResult ImportBooks()
+        [HttpPost("sync")]
+        public async Task<IActionResult> SyncCSV(IFormFile file)
         {
-            _bookService.ImportBooks();
-            return Ok("Books imported successfully!");
+            if (file == null || file.Length == 0)
+                return BadRequest("Please upload a valid CSV file.");
+
+            using var stream = file.OpenReadStream();
+            var result = _bookService.SyncBooksFromStream(stream);
+            return Ok(result);
         }
     }
 }
