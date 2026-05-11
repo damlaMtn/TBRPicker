@@ -22,8 +22,9 @@ If you're anything like me, your TBR list is out of control and choosing the nex
 - ✅ Filter by genre
 - ✅ Filter by one or multiple shelves
 - ✅ Sync new books without replacing existing data
+- ✅ Show full book list on the page
+- ✅ Filter book list by shelf
 - 🔜 Edit book genres from the frontend
-- 🔜 Show full book list on the page
 - 🔜 AI-powered mood-based picking
 
 ---
@@ -82,6 +83,9 @@ If you're anything like me, your TBR list is out of control and choosing the nex
 | GET | `/api/book/shelves` | Returns all available shelves |
 | POST | `/api/book/upload` | Uploads and imports a Goodreads CSV file |
 | POST | `/api/book/sync` | Syncs CSV adds new books, skips existing |
+| GET | `/api/book/list` | Returns paginated book list with optional search and shelf filter |
+| GET | `/api/book/list?search=kafka` | Search by title or author |
+| GET | `/api/book/list?shelf=to-read&page=2` | Filtered and paginated list |
 
 ---
 

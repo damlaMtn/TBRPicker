@@ -130,5 +130,36 @@ namespace TBRPicker.Controllers
             var result = _bookService.SyncBooksFromStream(stream);
             return Ok(result);
         }
+
+        [HttpGet("list")]
+        public IActionResult GetBooks(
+    [FromQuery] string? search = null,
+    [FromQuery] string? shelf = null,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20)
+        {
+            try
+            {
+                var books = _bookService.GetFilteredBooks(search, shelf);
+                var total = books.Count;
+                var paged = books
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                return Ok(new
+                {
+                    total,
+                    page,
+                    pageSize,
+                    books = paged
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching book list.");
+                return Problem(title: "Unexpected error", detail: "An error occurred while fetching the book list.");
+            }
+        }
     }
 }

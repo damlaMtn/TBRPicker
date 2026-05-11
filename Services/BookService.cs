@@ -36,7 +36,7 @@ namespace TBRPicker.Services
                 {
                     var selectedShelves = shelf.Split(',').Select(s => s.Trim().ToLower()).ToList();
                     books = books.Where(b => b.Shelf != null &&
-                            selectedShelves.Any(s => b.Shelf.ToLower().Contains(s)));
+                            selectedShelves.All(s => b.Shelf.ToLower().Contains(s)));
                 }
 
                 return books.ToList();
@@ -143,6 +143,28 @@ namespace TBRPicker.Services
 
             _context.SaveChanges();
             return $"{newBooks.Count} new books added. {csvBooks.Count - newBooks.Count} already existed, skipped.";
+        }
+
+        public List<Book> GetFilteredBooks(string? search = null, string? shelf = null)
+        {
+            var books = _context.Books.AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                var q = search.ToLower();
+                books = books.Where(b =>
+                    b.Title.ToLower().Contains(q) ||
+                    b.Author.ToLower().Contains(q));
+            }
+
+            if (!string.IsNullOrEmpty(shelf))
+            {
+                var selectedShelves = shelf.Split(',').Select(s => s.Trim().ToLower()).ToList();
+                books = books.Where(b => b.Shelf != null &&
+                        selectedShelves.All(s => b.Shelf.ToLower().Contains(s)));
+            }
+
+            return books.OrderBy(b => b.Title).ToList();
         }
     }
 }
