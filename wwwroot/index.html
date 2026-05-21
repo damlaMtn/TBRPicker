@@ -6,6 +6,7 @@
     <title>TBRPicker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="/css/site.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
 </head>
 <body>
     <div class="container py-5" style="max-width: 960px;">
@@ -69,41 +70,47 @@
         </div>
 
         <!-- Book List Section -->
-        <div class="mt-5">
-            <div class="d-flex justify-content-between align-items-center mb-3"
+        <div class="card p-4 mt-4">
+            <div class="d-flex justify-content-between align-items-center"
                  style="cursor:pointer;" onclick="toggleBookList()">
                 <h5 class="mb-0" style="color: #2E75B6;">
-                    📖 My Books <span id="bookCount" class="text-muted fw-normal" style="font-size:0.9rem;"></span>
+                    📖 My Books
+                    <span id="bookCount" class="text-muted fw-normal"
+                          style="font-size:0.9rem;"></span>
                 </h5>
-                <span id="toggleIcon" style="color: #2E75B6;">▼</span>
+                <span id="toggleIcon" style="color: #2E75B6;">▲</span>
             </div>
 
-            <div id="bookListSection" style="display:none;">
+            <div id="bookListSection" class="mt-3">
                 <div class="mb-3">
                     <input type="text" id="bookSearch" class="form-control"
                            placeholder="Search by title or author..."
                            oninput="searchBooks()" />
                 </div>
 
-                <div class="card p-3">
-                    <table class="table table-hover mb-0" style="font-size:0.9rem;">
-                        <thead>
-                            <tr style="color: #2E75B6;">
-                                <th>Title</th>
-                                <th>Author</th>
-                                <th>Pages</th>
-                                <th>Genre</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bookTableBody"></tbody>
-                    </table>
-                </div>
+                <table class="table table-hover mb-0" style="font-size:0.9rem;">
+                    <thead>
+                        <tr style="color: #2E75B6;">
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Pages</th>
+                            <th>Genre</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookTableBody"></tbody>
+                </table>
 
-                <!-- Pagination -->
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <button class="btn btn-outline-primary btn-sm" onclick="changePage(-1)" id="prevBtn">← Prev</button>
-                    <span id="pageInfo" class="text-muted" style="font-size:0.85rem;"></span>
-                    <button class="btn btn-outline-primary btn-sm" onclick="changePage(1)" id="nextBtn">Next →</button>
+                    <button class="btn btn-outline-primary btn-sm"
+                            onclick="changePage(-1)" id="prevBtn">
+                        ← Prev
+                    </button>
+                    <span id="pageInfo" class="text-muted"
+                          style="font-size:0.85rem;"></span>
+                    <button class="btn btn-outline-primary btn-sm"
+                            onclick="changePage(1)" id="nextBtn">
+                        Next →
+                    </button>
                 </div>
             </div>
         </div>

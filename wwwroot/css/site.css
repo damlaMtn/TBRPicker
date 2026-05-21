@@ -42,3 +42,17 @@
 #result {
     display: none;
 }
+
+.genre-cell .edit-genre-btn {
+    opacity: 0;
+    transition: opacity 0.15s;
+    color: #2E75B6;
+}
+
+tr:hover .edit-genre-btn {
+    opacity: 1;
+}
+
+.genre-input-wrap .btn {
+    flex-shrink: 0;
+}

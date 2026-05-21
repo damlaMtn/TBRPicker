@@ -62,7 +62,10 @@ async function uploadCSV() {
         message.style.color = response.ok ? '#2E75B6' : '#dc3545';
         message.textContent = text;
 
-        if (response.ok) await loadShelves();
+        if (response.ok) {
+            await loadShelves();
+            await loadBookList();
+        }
 
     } catch (error) {
         message.style.color = '#dc3545';
@@ -147,7 +150,7 @@ async function syncCSV() {
 let currentPage = 1;
 let totalBooks = 0;
 const pageSize = 20;
-let bookListOpen = false;
+let bookListOpen = true;
 let searchTimeout = null;
 
 function toggleBookList() {
@@ -198,11 +201,27 @@ async function loadBookList() {
         data.books.forEach(book => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${book.title}</td>
-                <td>${book.author}</td>
-                <td>${book.pageCount ?? '—'}</td>
-                <td>${book.genre ?? '—'}</td>
-            `;
+        <td>${book.title}</td>
+        <td>${book.author}</td>
+        <td>${book.pageCount ?? '—'}</td>
+        <td class="genre-cell" data-id="${book.id}" data-genre="${book.genre ?? ''}">
+            <div class="genre-display">
+                <span class="genre-text ${!book.genre ? 'text-muted fst-italic' : ''}">
+                    ${book.genre || 'No genre'}
+                </span>
+                <button class="btn btn-link btn-sm p-0 ms-1 edit-genre-btn" title="Edit genre">
+                    <i class="bi bi-pencil" style="font-size:11px;"></i>
+                </button>
+            </div>
+            <div class="genre-input-wrap" style="display:none;">
+                <input type="text" class="form-control form-control-sm genre-input"
+                       value="${book.genre ?? ''}"
+                       placeholder="e.g. Fiction, Literary">
+                <button class="btn btn-sm btn-success confirm-genre-btn" title="Save">✓</button>
+                <button class="btn btn-sm btn-secondary cancel-genre-btn" title="Cancel">✕</button>
+            </div>
+        </td>
+    `;
             tbody.appendChild(tr);
         });
     }
@@ -227,3 +246,90 @@ async function updateBookCount() {
 
     document.getElementById('bookCount').textContent = `(${data.total})`;
 }
+
+// Genre edit handlers
+document.addEventListener('click', function (e) {
+    if (e.target.closest('.edit-genre-btn')) {
+        // Close any other open edit cells first
+        document.querySelectorAll('.genre-cell').forEach(c => cancelGenreEdit(c));
+
+        const cell = e.target.closest('.genre-cell');
+        cell.querySelector('.genre-display').style.display = 'none';
+        const wrap = cell.querySelector('.genre-input-wrap');
+        wrap.style.display = 'flex';
+        wrap.style.gap = '6px';
+        wrap.style.alignItems = 'center';
+        wrap.querySelector('.genre-input').focus();
+    }
+
+    if (e.target.closest('.confirm-genre-btn')) {
+        saveGenre(e.target.closest('.genre-cell'));
+    }
+
+    if (e.target.closest('.cancel-genre-btn')) {
+        cancelGenreEdit(e.target.closest('.genre-cell'));
+    }
+});
+
+document.addEventListener('keydown', function (e) {
+    if (!e.target.classList.contains('genre-input')) return;
+    const cell = e.target.closest('.genre-cell');
+    if (e.key === 'Enter') { e.preventDefault(); saveGenre(cell); }
+    if (e.key === 'Escape') { cancelGenreEdit(cell); }
+});
+
+function cancelGenreEdit(cell) {
+    cell.querySelector('.genre-input').value = cell.dataset.genre;
+    cell.querySelector('.genre-input-wrap').style.display = 'none';
+    cell.querySelector('.genre-display').style.display = 'flex';
+    cell.querySelector('.genre-display').style.alignItems = 'center';
+    cell.querySelector('.genre-display').style.gap = '6px';
+}
+
+async function saveGenre(cell) {
+    const id = cell.dataset.id;
+    const newGenre = cell.querySelector('.genre-input').value.trim();
+
+    try {
+        const response = await fetch(`/api/book/${id}/genre`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ genre: newGenre })
+        });
+
+        if (!response.ok) throw new Error('Save failed');
+
+        cell.dataset.genre = newGenre;
+        const textEl = cell.querySelector('.genre-text');
+        textEl.textContent = newGenre || 'No genre';
+        textEl.className = 'genre-text' + (!newGenre ? ' text-muted fst-italic' : '');
+
+        cancelGenreEdit(cell);
+        showToast('Genre saved!', 'success');
+    } catch {
+        showToast('Failed to save genre.', 'danger');
+        cancelGenreEdit(cell);
+    }
+}
+
+function showToast(message, type) {
+    const existing = document.getElementById('grToast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'grToast';
+    toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3 shadow`;
+    toast.style.zIndex = '9999';
+    toast.style.fontSize = '0.9rem';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+}
+
+// Initialize on page load
+(async () => {
+    await loadShelves();
+    await loadBookList();
+    document.getElementById('bookListSection').style.display = 'block';
+    document.getElementById('toggleIcon').textContent = '▲';
+})();

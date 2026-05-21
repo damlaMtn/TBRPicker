@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.IO;
 using TBRPicker.Data;
+using TBRPicker.Jobs;
 using TBRPicker.Models;
 using TBRPicker.Services;
 
@@ -21,7 +22,18 @@ builder.Services.AddScoped<TBRPicker.Services.BookService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=tbr.db"));
 builder.Services.AddScoped<BookService>();
+builder.Services.AddSingleton<ImportChannel>();
+builder.Services.AddSingleton<ImportQueue>();
+builder.Services.AddHostedService<ImportWorker>();
 
+builder.Services.AddHttpClient<GoodreadsScraperService>(client =>
+{
+    client.DefaultRequestHeaders.Add(
+        "User-Agent",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"
+    );
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 var app = builder.Build();
 

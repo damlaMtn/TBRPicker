@@ -22,9 +22,10 @@ If you're anything like me, your TBR list is out of control and choosing the nex
 - ✅ Filter by genre
 - ✅ Filter by one or multiple shelves
 - ✅ Sync new books without replacing existing data
-- ✅ Show full book list on the page
+- ✅ Browse full book list with search and pagination
 - ✅ Filter book list by shelf
-- 🔜 Edit book genres from the frontend
+- ✅ Edit book genres directly from the book list
+- 🔜 Edit shelf status from the frontend
 - 🔜 AI-powered mood-based picking
 
 ---
@@ -34,7 +35,8 @@ If you're anything like me, your TBR list is out of control and choosing the nex
 - [ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/) — backend API
 - [CsvHelper](https://joshclose.github.io/CsvHelper/) — Goodreads CSV parsing
 - [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/) + SQLite — data persistence
-- Bootstrap 5 — frontend styling
+- [HtmlAgilityPack](https://html-agility-pack.net/) — HTML parsing for future Goodreads scraping
+- Bootstrap 5 + Bootstrap Icons — frontend styling
 
 ---
 

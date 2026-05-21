@@ -166,5 +166,15 @@ namespace TBRPicker.Services
 
             return books.OrderBy(b => b.Title).ToList();
         }
+
+        public async Task<bool> UpdateGenreAsync(int id, string? genre)
+        {
+            var book = await _context.Books.FindAsync(id);
+            if (book is null) return false;
+
+            book.Genre = string.IsNullOrWhiteSpace(genre) ? null : genre.Trim();
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

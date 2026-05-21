@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
+using TBRPicker.DTOs;
 using TBRPicker.Services;
 
 namespace TBRPicker.Controllers
@@ -160,6 +161,14 @@ namespace TBRPicker.Controllers
                 _logger.LogError(ex, "Error fetching book list.");
                 return Problem(title: "Unexpected error", detail: "An error occurred while fetching the book list.");
             }
+        }
+
+        [HttpPatch("{id}/genre")]
+        public async Task<IActionResult> UpdateGenre(int id, [FromBody] UpdateGenreDto dto)
+        {
+            var result = await _bookService.UpdateGenreAsync(id, dto.Genre);
+            if (!result) return NotFound();
+            return NoContent();
         }
     }
 }
