@@ -8,7 +8,7 @@ A random book picker that reads your Goodreads TBR list and suggests what to rea
 
 ## What it does
 
-If you're anything like me, your TBR list is out of control and choosing the next book is somehow harder than reading it. TBRPicker solves that by picking one for you — randomly, or filtered by page count, genre, or shelf.
+If you're anything like me, your TBR list is out of control, and choosing the next book is somehow harder than reading it. TBRPicker solves that by picking one for you, randomly, or filtered by page count, genre, or shelf.
 
 ---
 
