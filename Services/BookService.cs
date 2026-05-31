@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Globalization;
 using System.IO;
@@ -29,8 +30,15 @@ namespace TBRPicker.Services
                     books = books.Where(b => b.PageCount <= maxPages.Value);
 
                 if (!string.IsNullOrEmpty(genre))
+                {
+                    var selectedGenres = genre.Split(',')
+                        .Select(g => g.Trim().ToLower())
+                        .Where(g => !string.IsNullOrEmpty(g))
+                        .ToList();
+
                     books = books.Where(b => b.Genre != null &&
-                            b.Genre.ToLower().Contains(genre.ToLower()));
+                        selectedGenres.Any(g => b.Genre.ToLower().Contains(g)));
+                }
 
                 if (!string.IsNullOrEmpty(shelf))
                 {
@@ -175,6 +183,22 @@ namespace TBRPicker.Services
             book.Genre = string.IsNullOrWhiteSpace(genre) ? null : genre.Trim();
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<string>> GetAllGenresAsync()
+        {
+            var allGenres = await _context.Books
+                .Where(b => !string.IsNullOrEmpty(b.Genre))
+                .Select(b => b.Genre!)
+                .ToListAsync();
+
+            return allGenres
+                .SelectMany(g => g.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                .Select(g => g.Trim())
+                .Where(g => !string.IsNullOrEmpty(g))
+                .Distinct()
+                .OrderBy(g => g)
+                .ToList();
         }
     }
 }

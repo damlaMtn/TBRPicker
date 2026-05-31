@@ -1,149 +1,175 @@
 ﻿async function pickBook() {
-    const maxPages = document.getElementById('maxPages').value;
-    const genre = document.getElementById('genre').value;
-
-    // Get checked shelves
-    const checkedShelves = [...document.querySelectorAll('#shelfCheckboxes input:checked')]
-        .map(cb => cb.value);
-
-    let url = '/api/book/random';
-    const params = new URLSearchParams();
-    if (maxPages) params.append('maxPages', maxPages);
-    if (genre) params.append('genre', genre);
-    if (checkedShelves.length > 0) params.append('shelf', checkedShelves.join(','));
-    if ([...params].length > 0) url += '?' + params.toString();
-
     try {
-        const response = await fetch(url);
+        const maxPages = document.getElementById('maxPages').value;
+        const checkedGenres = selectedGenres;
 
-        if (response.status === 404) {
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('noResult').style.display = 'block';
-            return;
+        // Get checked shelves
+        const checkedShelves = [...document.querySelectorAll('#shelfCheckboxes input:checked')]
+            .map(cb => cb.value);
+
+        let url = '/api/book/random';
+        const params = new URLSearchParams();
+        if (maxPages) params.append('maxPages', maxPages);
+        if (checkedGenres.length > 0) params.append('genre', checkedGenres.join(','));
+        if (checkedShelves.length > 0) params.append('shelf', checkedShelves.join(','));
+        if ([...params].length > 0) url += '?' + params.toString();
+
+        try {
+            const response = await fetch(url);
+
+            if (response.status === 404) {
+                document.getElementById('result').style.display = 'none';
+                document.getElementById('noResult').style.display = 'block';
+                return;
+            }
+
+            const book = await response.json();
+            document.getElementById('bookTitle').textContent = book.title;
+            document.getElementById('bookAuthor').textContent = book.author;
+            document.getElementById('bookPages').textContent = book.pageCount ? `${book.pageCount} pages` : '';
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('noResult').style.display = 'none';
+
+        } catch (error) {
+            console.error('Error:', error);
         }
-
-        const book = await response.json();
-        document.getElementById('bookTitle').textContent = book.title;
-        document.getElementById('bookAuthor').textContent = book.author;
-        document.getElementById('bookPages').textContent = book.pageCount ? `${book.pageCount} pages` : '';
-        document.getElementById('result').style.display = 'block';
-        document.getElementById('noResult').style.display = 'none';
-
     } catch (error) {
+        showToast('Something went wrong picking a book. Please try again.', 'danger');
         console.error('Error:', error);
     }
 }
 
 async function uploadCSV() {
-    const fileInput = document.getElementById('csvFile');
-    const message = document.getElementById('importMessage');
-
-    if (!fileInput.files[0]) {
-        message.style.display = 'block';
-        message.style.color = '#888';
-        message.textContent = 'Please select a CSV file first.';
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', fileInput.files[0]);
-
     try {
-        message.style.display = 'block';
-        message.style.color = '#888';
-        message.textContent = 'Importing...';
+        const fileInput = document.getElementById('csvFile');
+        const message = document.getElementById('importMessage');
 
-        const response = await fetch('/api/book/upload', {
-            method: 'POST',
-            body: formData
-        });
-
-        const text = await response.text();
-        message.style.color = response.ok ? '#2E75B6' : '#dc3545';
-        message.textContent = text;
-
-        if (response.ok) {
-            await loadShelves();
-            await loadBookList();
+        if (!fileInput.files[0]) {
+            message.style.display = 'block';
+            message.style.color = '#888';
+            message.textContent = 'Please select a CSV file first.';
+            return;
         }
 
-    } catch (error) {
-        message.style.color = '#dc3545';
-        message.textContent = 'Something went wrong. Please try again.';
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            message.style.display = 'block';
+            message.style.color = '#888';
+            message.textContent = 'Importing...';
+
+            const response = await fetch('/api/book/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const text = await response.text();
+            message.style.color = response.ok ? '#2E75B6' : '#dc3545';
+            message.textContent = text;
+
+            if (response.ok) {
+                await loadShelves();
+                await loadGenres();
+                await loadBookList();
+                document.getElementById('filtersCard').style.display = 'block';
+                document.getElementById('pickBtn').style.display = 'block';
+            }
+
+        } catch (error) {
+            message.style.color = '#dc3545';
+            message.textContent = 'Something went wrong. Please try again.';
+        }
+    } catch {
+        showToast('Something went wrong. Please try again.', 'danger');
     }
 }
 
 async function loadShelves() {
-    const response = await fetch('/api/book/shelves');
-    const shelves = await response.json();
+    try {
+        const response = await fetch('/api/book/shelves');
+        const shelves = await response.json();
 
-    const container = document.getElementById('shelfCheckboxes');
-    container.innerHTML = '';
+        const container = document.getElementById('shelfCheckboxes');
+        container.innerHTML = '';
 
-    shelves.forEach(shelf => {
-        const label = document.createElement('label');
-        label.className = 'badge border';
-        label.style.cssText = 'cursor:pointer; font-size:0.85rem; padding: 8px 12px; color: #2E75B6; border-color: #2E75B6 !important; font-weight: normal;';
+        shelves.forEach(shelf => {
+            const label = document.createElement('label');
+            label.className = 'badge border';
+            label.style.cssText = 'cursor:pointer; font-size:0.85rem; padding: 8px 12px; color: #2E75B6; border-color: #2E75B6 !important; font-weight: normal;';
 
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.value = shelf;
-        checkbox.style.marginRight = '6px';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = shelf;
+            checkbox.style.marginRight = '6px';
 
-        checkbox.addEventListener('change', () => {
-            updateBookCount();
-            if (bookListOpen) {
-                currentPage = 1;
-                loadBookList();
-            }
+            checkbox.addEventListener('change', () => {
+                updateBookCount();
+                if (bookListOpen) {
+                    currentPage = 1;
+                    loadBookList();
+                }
+            });
+
+            // Check to-read by default if it exists
+            if (shelf === 'to-read') checkbox.checked = true;
+
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(shelf));
+            container.appendChild(label);
         });
 
-        // Check to-read by default if it exists
-        if (shelf === 'to-read') checkbox.checked = true;
+        document.getElementById('shelfSection').style.display = 'block';
 
-        label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(shelf));
-        container.appendChild(label);
-    });
-
-    document.getElementById('shelfSection').style.display = 'block';
-
-    updateBookCount();
+        updateBookCount();
+    } catch {
+        console.warn('Could not load shelves');
+    }
 }
 
 async function syncCSV() {
-    const fileInput = document.getElementById('csvFile');
-    const message = document.getElementById('importMessage');
-
-    if (!fileInput.files[0]) {
-        message.style.display = 'block';
-        message.style.color = '#888';
-        message.textContent = 'Please select a CSV file first.';
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', fileInput.files[0]);
-
     try {
-        message.style.display = 'block';
-        message.style.color = '#888';
-        message.textContent = 'Syncing...';
+        const fileInput = document.getElementById('csvFile');
+        const message = document.getElementById('importMessage');
 
-        const response = await fetch('/api/book/sync', {
-            method: 'POST',
-            body: formData
-        });
+        if (!fileInput.files[0]) {
+            message.style.display = 'block';
+            message.style.color = '#888';
+            message.textContent = 'Please select a CSV file first.';
+            return;
+        }
 
-        const text = await response.text();
-        message.style.color = response.ok ? '#2E75B6' : '#dc3545';
-        message.textContent = text;
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
 
-        if (response.ok) await loadShelves();
+        try {
+            message.style.display = 'block';
+            message.style.color = '#888';
+            message.textContent = 'Syncing...';
 
-    } catch (error) {
-        message.style.color = '#dc3545';
-        message.textContent = 'Something went wrong. Please try again.';
+            const response = await fetch('/api/book/sync', {
+                method: 'POST',
+                body: formData
+            });
+
+            const text = await response.text();
+            message.style.color = response.ok ? '#2E75B6' : '#dc3545';
+            message.textContent = text;
+
+            if (response.ok) {
+                await loadShelves();
+                await loadGenres();
+                await loadBookList();
+                document.getElementById('filtersCard').style.display = 'block';
+                document.getElementById('pickBtn').style.display = 'block';
+            }
+
+        } catch (error) {
+            message.style.color = '#dc3545';
+            message.textContent = 'Something went wrong. Please try again.';
+        }
+    } catch {
+        showToast('Something went wrong. Please try again.', 'danger');
     }
 }
 
@@ -175,61 +201,82 @@ function changePage(direction) {
 }
 
 async function loadBookList() {
-    const search = document.getElementById('bookSearch')?.value || '';
-    const checkedShelves = [...document.querySelectorAll('#shelfCheckboxes input:checked')]
-        .map(cb => cb.value);
+    try {
+        const search = document.getElementById('bookSearch')?.value || '';
+        const checkedShelves = [...document.querySelectorAll('#shelfCheckboxes input:checked')]
+            .map(cb => cb.value);
 
-    const params = new URLSearchParams();
-    params.append('page', currentPage);
-    params.append('pageSize', pageSize);
-    if (search) params.append('search', search);
-    if (checkedShelves.length > 0) params.append('shelf', checkedShelves.join(','));
+        const params = new URLSearchParams();
+        params.append('page', currentPage);
+        params.append('pageSize', pageSize);
+        if (search) params.append('search', search);
+        if (checkedShelves.length > 0) params.append('shelf', checkedShelves.join(','));
 
-    const response = await fetch('/api/book/list?' + params.toString());
-    const data = await response.json();
+        const response = await fetch('/api/book/list?' + params.toString());
+        const data = await response.json();
 
-    totalBooks = data.total;
+        totalBooks = data.total;
 
-    document.getElementById('bookCount').textContent = `(${totalBooks})`;
+        document.getElementById('bookCount').textContent = `(${totalBooks})`;
 
-    const tbody = document.getElementById('bookTableBody');
-    tbody.innerHTML = '';
+        const tbody = document.getElementById('bookTableBody');
+        tbody.innerHTML = '';
 
-    if (data.books.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No books found.</td></tr>';
-    } else {
-        data.books.forEach(book => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-        <td>${book.title}</td>
-        <td>${book.author}</td>
-        <td>${book.pageCount ?? '—'}</td>
-        <td class="genre-cell" data-id="${book.id}" data-genre="${book.genre ?? ''}">
-            <div class="genre-display">
-                <span class="genre-text ${!book.genre ? 'text-muted fst-italic' : ''}">
-                    ${book.genre || 'No genre'}
-                </span>
-                <button class="btn btn-link btn-sm p-0 ms-1 edit-genre-btn" title="Edit genre">
-                    <i class="bi bi-pencil" style="font-size:11px;"></i>
-                </button>
-            </div>
-            <div class="genre-input-wrap" style="display:none;">
-                <input type="text" class="form-control form-control-sm genre-input"
-                       value="${book.genre ?? ''}"
-                       placeholder="e.g. Fiction, Literary">
-                <button class="btn btn-sm btn-success confirm-genre-btn" title="Save">✓</button>
-                <button class="btn btn-sm btn-secondary cancel-genre-btn" title="Cancel">✕</button>
-            </div>
-        </td>
-    `;
-            tbody.appendChild(tr);
-        });
+        if (data.books.length === 0 && totalBooks === 0) {
+
+            console.log('books:', data.books.length, 'total:', totalBooks);
+
+            tbody.innerHTML = '';
+            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('pageInfo').textContent = '';
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+        } else if (data.books.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No books found.</td></tr>';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        } else {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+
+            document.getElementById('pageInfo').textContent =
+                `Page ${currentPage} of ${Math.ceil(totalBooks / pageSize)}`;
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage >= Math.ceil(totalBooks / pageSize);
+
+            data.books.forEach(book => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+            <td>${book.title}</td>
+            <td>${book.author}</td>
+            <td>${book.pageCount ?? '—'}</td>
+            <td class="genre-cell" data-id="${book.id}" data-genre="${book.genre ?? ''}">
+                <div class="genre-display">
+                    <span class="genre-text ${!book.genre ? 'text-muted fst-italic' : ''}">
+                        ${book.genre || 'No genre'}
+                    </span>
+                    <button class="btn btn-link btn-sm p-0 ms-1 edit-genre-btn" title="Edit genre">
+                        <i class="bi bi-pencil" style="font-size:11px;"></i>
+                    </button>
+                </div>
+                <div class="genre-input-wrap" style="display:none;">
+                    <input type="text" class="form-control form-control-sm genre-input"
+                           value="${book.genre ?? ''}"
+                           placeholder="e.g. Fiction, Literary">
+                    <button class="btn btn-sm btn-success confirm-genre-btn" title="Save">✓</button>
+                    <button class="btn btn-sm btn-secondary cancel-genre-btn" title="Cancel">✕</button>
+                </div>
+            </td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+    } catch {
+        showToast('Failed to load books. Please try again.', 'danger');
     }
 
-    document.getElementById('pageInfo').textContent =
-        `Page ${currentPage} of ${Math.ceil(totalBooks / pageSize)}`;
-    document.getElementById('prevBtn').disabled = currentPage === 1;
-    document.getElementById('nextBtn').disabled = currentPage >= Math.ceil(totalBooks / pageSize);
 }
 
 async function updateBookCount() {
@@ -326,10 +373,111 @@ function showToast(message, type) {
     setTimeout(() => toast.remove(), 2500);
 }
 
+let allGenres = [];
+let selectedGenres = [];
+
+async function loadGenres() {
+    const response = await fetch('/api/book/genres');
+    allGenres = await response.json();
+    renderGenreDropdown(allGenres);
+}
+
+function renderGenreDropdown(genres) {
+    const dropdown = document.getElementById('genreDropdown');
+    dropdown.innerHTML = '';
+
+    if (genres.length === 0) {
+        dropdown.innerHTML = '<div class="px-3 py-2 text-muted" style="font-size:0.85rem;">No genres found</div>';
+        return;
+    }
+
+    genres.forEach(genre => {
+        const isSelected = selectedGenres.includes(genre);
+        const item = document.createElement('div');
+        item.className = 'genre-option px-3 py-2';
+        item.style.cssText = `cursor:pointer; font-size:0.9rem; 
+            background: ${isSelected ? '#e8f0fb' : 'white'};
+            color: ${isSelected ? '#2E75B6' : '#1a1a1a'};`;
+        item.textContent = (isSelected ? '✓ ' : '') + genre;
+
+        item.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // prevent blur before click registers
+            toggleGenre(genre);
+        });
+
+        dropdown.appendChild(item);
+    });
+}
+
+function filterGenres() {
+    const search = document.getElementById('genreSearch').value.toLowerCase();
+    const filtered = allGenres.filter(g => g.toLowerCase().includes(search));
+    renderGenreDropdown(filtered);
+    document.getElementById('genreDropdown').style.display = 'block';
+}
+
+function openGenreDropdown() {
+    const search = document.getElementById('genreSearch').value.toLowerCase();
+    const filtered = allGenres.filter(g => g.toLowerCase().includes(search));
+    renderGenreDropdown(filtered);
+    document.getElementById('genreDropdown').style.display = 'block';
+}
+
+function closeGenreDropdown() {
+    document.getElementById('genreDropdown').style.display = 'none';
+}
+
+function toggleGenre(genre) {
+    if (selectedGenres.includes(genre)) {
+        selectedGenres = selectedGenres.filter(g => g !== genre);
+    } else {
+        selectedGenres.push(genre);
+    }
+    renderSelectedGenres();
+    renderGenreDropdown(allGenres.filter(g =>
+        g.toLowerCase().includes(document.getElementById('genreSearch').value.toLowerCase())
+    ));
+}
+
+function renderSelectedGenres() {
+    const container = document.getElementById('selectedGenres');
+    container.innerHTML = '';
+
+    selectedGenres.forEach(genre => {
+        const badge = document.createElement('span');
+        badge.className = 'badge border';
+        badge.style.cssText = 'font-size:0.85rem; padding:6px 10px; color:#2E75B6; border-color:#2E75B6 !important; font-weight:normal; cursor:pointer;';
+        badge.innerHTML = `${genre} <span style="margin-left:4px;">×</span>`;
+        badge.onclick = () => toggleGenre(genre);
+        container.appendChild(badge);
+    });
+}
+
 // Initialize on page load
 (async () => {
-    await loadShelves();
-    await loadBookList();
-    document.getElementById('bookListSection').style.display = 'block';
-    document.getElementById('toggleIcon').textContent = '▲';
+    try {
+        const response = await fetch('/api/book/list?page=1&pageSize=1');
+        const data = await response.json();
+        const hasBooks = data.total > 0;
+
+        if (hasBooks) {
+            await loadShelves();
+            await loadGenres();
+            await loadBookList();
+            document.getElementById('bookListSection').style.display = 'block';
+            document.getElementById('toggleIcon').textContent = '▲';
+            document.getElementById('filtersCard').style.display = 'block';
+            document.getElementById('pickBtn').style.display = 'block';
+        } else {
+            document.getElementById('filtersCard').style.display = 'none';
+            document.getElementById('pickBtn').style.display = 'none';
+            document.getElementById('shelfSection').style.display = 'none';
+            document.getElementById('bookListSection').style.display = 'block';
+            document.getElementById('toggleIcon').textContent = '▲';
+            await loadBookList();
+        }
+    } catch {
+        showToast('Could not connect to the server. Please refresh the page.', 'danger');
+    }
 })();
+

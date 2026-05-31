@@ -170,5 +170,12 @@ namespace TBRPicker.Controllers
             if (!result) return NotFound();
             return NoContent();
         }
+
+        [HttpGet("genres")]
+        public async Task<IActionResult> GetGenres()
+        {
+            var genres = await _bookService.GetAllGenresAsync();
+            return Ok(genres);
+        }
     }
 }
