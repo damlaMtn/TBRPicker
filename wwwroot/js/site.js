@@ -74,6 +74,7 @@ async function uploadCSV() {
                 await loadBookList();
                 document.getElementById('filtersCard').style.display = 'block';
                 document.getElementById('pickBtn').style.display = 'block';
+                document.getElementById('aiCard').style.display = 'block';
             }
 
         } catch (error) {
@@ -162,6 +163,7 @@ async function syncCSV() {
                 await loadBookList();
                 document.getElementById('filtersCard').style.display = 'block';
                 document.getElementById('pickBtn').style.display = 'block';
+                document.getElementById('aiCard').style.display = 'block';
             }
 
         } catch (error) {
@@ -453,6 +455,68 @@ function renderSelectedGenres() {
     });
 }
 
+function toggleMoodTag(btn) {
+    btn.classList.toggle('active');
+    // Build mood input from active tags
+    const activeTags = [...document.querySelectorAll('.mood-tag.active')]
+        .map(t => t.textContent.trim().replace(/^\S+\s/, '')); // strip emoji
+    const manualInput = document.getElementById('moodInput').value;
+    if (activeTags.length > 0 && !manualInput) {
+        document.getElementById('moodInput').placeholder =
+            `Selected: ${activeTags.join(', ')} — or describe further...`;
+    }
+}
+
+async function getAiRecommendation() {
+    const activeTags = [...document.querySelectorAll('.mood-tag.active')]
+        .map(t => t.textContent.trim().replace(/^\S+\s/, ''));
+    const manualMood = document.getElementById('moodInput').value.trim();
+
+    const mood = [activeTags.join(', '), manualMood].filter(Boolean).join(' — ');
+
+    if (!mood) {
+        showToast('Please select a mood tag or describe your mood!', 'warning');
+        return;
+    }
+
+    const checkedShelves = [...document.querySelectorAll('#shelfCheckboxes input:checked')]
+        .map(cb => cb.value);
+
+    const requestBody = {
+        mood,
+        shelf: checkedShelves.length > 0 ? checkedShelves.join(',') : null,
+        maxPages: document.getElementById('maxPages').value || null,
+        genre: selectedGenres.length > 0 ? selectedGenres.join(',') : null
+    };
+
+    document.getElementById('aiLoading').style.display = 'block';
+    document.getElementById('aiResult').style.display = 'none';
+
+    try {
+        const response = await fetch('/api/book/recommend', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) throw new Error('Recommendation failed');
+
+        const data = await response.json();
+
+        document.getElementById('aiBookTitle').textContent = data.book.title;
+        document.getElementById('aiBookAuthor').textContent = data.book.author;
+        document.getElementById('aiBookPages').textContent =
+            data.book.pageCount ? `${data.book.pageCount} pages` : '';
+        document.getElementById('aiReason').textContent = data.reason;
+
+        document.getElementById('aiResult').style.display = 'block';
+    } catch {
+        showToast('AI recommendation failed. Please try again.', 'danger');
+    } finally {
+        document.getElementById('aiLoading').style.display = 'none';
+    }
+}
+
 // Initialize on page load
 (async () => {
     try {
@@ -468,10 +532,12 @@ function renderSelectedGenres() {
             document.getElementById('toggleIcon').textContent = '▲';
             document.getElementById('filtersCard').style.display = 'block';
             document.getElementById('pickBtn').style.display = 'block';
+            document.getElementById('aiCard').style.display = 'block';
         } else {
             document.getElementById('filtersCard').style.display = 'none';
             document.getElementById('pickBtn').style.display = 'none';
             document.getElementById('shelfSection').style.display = 'none';
+            document.getElementById('aiCard').style.display = 'none';
             document.getElementById('bookListSection').style.display = 'block';
             document.getElementById('toggleIcon').textContent = '▲';
             await loadBookList();

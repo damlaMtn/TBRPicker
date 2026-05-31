@@ -1,5 +1,4 @@
 # 📚 TBRPicker
-> **Work in progress** — actively being developed.
 
 A random book picker that reads your Goodreads TBR list and suggests what to read next. Upload your Goodreads export, pick your shelves, and let the app decide for you.
 
@@ -26,7 +25,7 @@ If you're anything like me, your TBR list is out of control, and choosing the ne
 - ✅ Edit book genres directly from the book list
 - ✅ Friendly empty state for new users
 - ✅ Frontend error handling
-- 🔜 AI-powered mood-based picking
+- ✅ AI-powered mood-based book picking with free text and mood tags
 
 ---
 
@@ -83,13 +82,8 @@ If you're anything like me, your TBR list is out of control, and choosing the ne
 | GET | `/api/book/list?shelf=to-read&page=2` | Filtered and paginated list |
 | POST | `/api/book/upload` | Uploads and imports a Goodreads CSV file |
 | POST | `/api/book/sync` | Syncs CSV — adds new books, skips existing |
+| POST | `/api/book/recommend` | AI mood-based book recommendation |
 | PATCH | `/api/book/{id}/genre` | Updates the genre of a specific book |
-
----
-
-## Project Status
-
-This project is being built as a learning exercise in ASP.NET Core backend development. It is a work in progress and updated regularly.
 
 ---
 

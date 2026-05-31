@@ -65,6 +65,50 @@
             </div>
         </div>
 
+        <!-- AI Mood Picker -->
+        <div class="card p-4 mb-4" id="aiCard">
+            <h5 class="mb-1" style="color: #2E75B6;">✨ Pick by mood</h5>
+            <p class="text-muted mb-3" style="font-size:0.85rem;">
+                Describe your reading mood or pick a tag — AI will find the best match from your library.
+                Results vary each time, so feel free to ask again!
+            </p>
+
+            <div class="d-flex flex-wrap gap-2 mb-3" id="moodTags">
+                <button class="btn btn-sm mood-tag" onclick="toggleMoodTag(this)">🍵 cozy</button>
+                <button class="btn btn-sm mood-tag" onclick="toggleMoodTag(this)">🌑 dark</button>
+                <button class="btn btn-sm mood-tag" onclick="toggleMoodTag(this)">🗺️ adventurous</button>
+                <button class="btn btn-sm mood-tag" onclick="toggleMoodTag(this)">💙 emotional</button>
+                <button class="btn btn-sm mood-tag" onclick="toggleMoodTag(this)">😄 funny</button>
+                <button class="btn btn-sm mood-tag" onclick="toggleMoodTag(this)">🧠 thought-provoking</button>
+                <button class="btn btn-sm mood-tag" onclick="toggleMoodTag(this)">💌 romantic</button>
+                <button class="btn btn-sm mood-tag" onclick="toggleMoodTag(this)">⚡ fast-paced</button>
+            </div>
+
+            <textarea id="moodInput" class="form-control mb-3" rows="2"
+                      placeholder="Or describe your mood freely... e.g. 'I want something cozy and a bit melancholic'"></textarea>
+
+            <button class="btn btn-pick w-100" onclick="getAiRecommendation()">
+                ✨ Find my next read
+            </button>
+
+            <!-- AI Result -->
+            <div id="aiResult" style="display:none;" class="mt-4 p-3 rounded-3"
+                 style="background:#f0f6ff; border: 1px solid #cce0ff;">
+                <div class="mb-1" style="font-size:0.8rem; color:#2E75B6; font-weight:500;">
+                    ✨ AI recommendation
+                </div>
+                <div id="aiBookTitle" class="book-title mb-1"></div>
+                <div id="aiBookAuthor" class="book-author mb-1"></div>
+                <div id="aiBookPages" class="book-pages mb-2"></div>
+                <div id="aiReason" class="fst-italic text-muted" style="font-size:0.9rem;"></div>
+            </div>
+
+            <div id="aiLoading" style="display:none;" class="text-center mt-3 text-muted">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                Finding your next read...
+            </div>
+        </div>
+
         <!-- Button -->
         <div class="text-center mb-4" id="pickBtn">
             <button class="btn btn-pick" onclick="pickBook()">Pick a book for me</button>

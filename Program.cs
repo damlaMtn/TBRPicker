@@ -25,6 +25,7 @@ builder.Services.AddScoped<BookService>();
 builder.Services.AddSingleton<ImportChannel>();
 builder.Services.AddSingleton<ImportQueue>();
 builder.Services.AddHostedService<ImportWorker>();
+builder.Services.AddHttpClient<AiRecommendationService>();
 
 builder.Services.AddHttpClient<GoodreadsScraperService>(client =>
 {

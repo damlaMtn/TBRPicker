@@ -56,3 +56,28 @@ tr:hover .edit-genre-btn {
 .genre-input-wrap .btn {
     flex-shrink: 0;
 }
+
+.mood-tag {
+    border: 1px solid #2E75B6;
+    color: #2E75B6;
+    background: white;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    padding: 5px 12px;
+    transition: all 0.15s;
+}
+
+    .mood-tag:hover {
+        background: #e8f0fb;
+        color: #2E75B6;
+    }
+
+    .mood-tag.active {
+        background: #2E75B6;
+        color: white;
+    }
+
+#aiResult {
+    background: #f0f6ff;
+    border: 1px solid #cce0ff;
+}

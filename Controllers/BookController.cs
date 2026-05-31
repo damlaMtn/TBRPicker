@@ -12,10 +12,12 @@ namespace TBRPicker.Controllers
     {
         private readonly BookService _bookService;
         private readonly ILogger<BookController> _logger;
+        private readonly AiRecommendationService _aiService;
 
-        public BookController(BookService bookService, ILogger<BookController> logger)
+        public BookController(BookService bookService, AiRecommendationService aiService, ILogger<BookController> logger)
         {
             _bookService = bookService;
+            _aiService = aiService;
             _logger = logger;
         }
 
@@ -176,6 +178,40 @@ namespace TBRPicker.Controllers
         {
             var genres = await _bookService.GetAllGenresAsync();
             return Ok(genres);
+        }
+
+        [HttpPost("recommend")]
+        public async Task<IActionResult> Recommend([FromBody] AiRecommendationRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Mood))
+                return BadRequest("Mood description is required");
+
+            // Reuse existing filter logic
+            var filtered = _bookService.GetTBRBooks(request.MaxPages, request.Genre, request.Shelf);
+
+            if (!filtered.Any())
+                return NotFound("No books found matching your filters");
+
+            // Sample up to 50 randomly
+            var sample = filtered
+                .OrderBy(_ => Guid.NewGuid())
+                .Take(50)
+                .ToList();
+
+            var result = await _aiService.RecommendAsync(request.Mood, sample);
+
+            if (result is null)
+                return StatusCode(500, "AI recommendation failed");
+
+            // Find the actual book in DB to return full details
+            var book = filtered.FirstOrDefault(b =>
+                b.Title.Equals(result.Title, StringComparison.OrdinalIgnoreCase));
+
+            return Ok(new
+            {
+                book,
+                reason = result.Reason
+            });
         }
     }
 }
